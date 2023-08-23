@@ -8,12 +8,27 @@ class Repository {
     _databaseConnection = DatabaseConnection();
   }
 
-  static late Database _database;
+  // static late Database _database;
+
+  Future<Database>? _databaseFuture; // Change here
+
+  // Future<Database> get database async {
+  //   if (_database != null) return _database;
+  //   _database = await _databaseConnection.setDatabase();
+  //   return _database;
+  // }
+
+  Future<Database> _initializeDatabase() async {
+    if (_databaseFuture == null) {
+      var dbConnection = await _databaseConnection.setDatabase();
+      _databaseFuture = Future.value(dbConnection);
+    }
+    return _databaseFuture!;
+  }
 
   Future<Database> get database async {
-    if (_database != null) return _database;
-    _database = await _databaseConnection.setDatabase();
-    return _database;
+    _databaseFuture ??= _initializeDatabase(); // Change here
+    return await _databaseFuture!;
   }
 
   Future<int> insertData(String table, Map<String, dynamic> data) async {

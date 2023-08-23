@@ -7,6 +7,7 @@ class Todo {
   late String isFinished;
   late String category;
 
+  Todo();
   Map<String, dynamic> todoMap() {
     var mapping = Map<String, dynamic>();
     mapping['id'] = id;
