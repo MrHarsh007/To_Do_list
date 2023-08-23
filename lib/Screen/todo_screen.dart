@@ -15,42 +15,46 @@ class TodoScreen extends StatefulWidget {
 
 class _TodoScreenState extends State<TodoScreen> {
   var _todoTitleController = TextEditingController();
-
   var _todoDateController = TextEditingController();
-
   var _selectedValue;
-
-  var _folders = List<DropdownMenuItem>;
+  List<DropdownMenuItem<String>> _folders = [];
 
   var _categories;
   @override
-    void initState(){
+  void initState() {
     super.initState();
     _loadFolders();
+    _loadCategories();
   }
 
-  _loadFolders() async{
+  _loadFolders() async {
     var _FolderService = FolderServices();
     var folders = await _FolderService.readFolder();
-    folders.forEach((folder){
-      setState((){
-        _folders.add(DropdownMenuItem(child: Text(folders['name']),
+    folders.forEach((folder) {
+      setState(() {
+        _folders.add(DropdownMenuItem(
+          child: Text(folders['name']),
           value: folder['name'],
         ));
       });
-
     });
+  }
+
+  _showSuccessSnackBar(message) {
+    var _snackBar = SnackBar(content: message);
+    _showSuccessSnackBar(SnackBar snackBar) {}
   }
 
   DateTime _dateTime = DateTime.now();
 
   _selectedTododate(BuildContext context) async {
-    var _pickedDate = await showDatePicker(context: context,
+    var _pickedDate = await showDatePicker(
+        context: context,
         initialDate: _dateTime,
         firstDate: DateTime(2000),
         lastDate: DateTime(2100));
 
-    if(_pickedDate!=null){
+    if (_pickedDate != null) {
       setState(() {
         _dateTime = _pickedDate;
         _todoDateController.text = DateFormat('dd-mm-yyyy').format(_pickedDate);
@@ -58,68 +62,77 @@ class _TodoScreenState extends State<TodoScreen> {
     }
   }
 
+  _loadCategories() async {
+    // Replace this with your code to load categories
+    // For example, you can populate _categories with DropdownMenuItem
+    _categories = [
+      DropdownMenuItem(value: 'Category 1', child: Text('Category 1')),
+      DropdownMenuItem(value: 'Category 2', child: Text('Category 2')),
+      // Add more categories as needed
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Create Todo'),
+        title: const Text('Create Todo'),
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
-          children: <Widget> [
+          children: <Widget>[
             TextField(
-              controller: _todoTitleController ,
-              decoration: InputDecoration(
-                labelText: 'Title',
-                hintText: 'Write Todo Title'
-              ),
+              controller: _todoTitleController,
+              decoration: const InputDecoration(
+                  labelText: 'Title', hintText: 'Write Todo Title'),
             ),
             TextField(
-              controller: _todoDateController ,
+              controller: _todoDateController,
               decoration: InputDecoration(
-                  labelText: 'Date',
-                  hintText: 'Pick a Date',
-                  prefixIcon: InkWell(
-                    onTap: (){
-                      _selectedTododate(context);
-                    },
-                    child: Icon(Icons.calendar_today),
-              ),
+                labelText: 'Date',
+                hintText: 'Pick a Date',
+                prefixIcon: InkWell(
+                  onTap: () {
+                    _selectedTododate(context);
+                  },
+                  child: const Icon(Icons.calendar_today),
+                ),
               ),
             ),
             DropdownButtonFormField(
-                value:_selectedValue ,
+                value: _selectedValue,
                 items: _categories,
-                hint: Text('Category') ,
-                onChanged: (value){
+                hint: const Text('Category'),
+                onChanged: (value) {
                   setState(() {
-                      _selectedValue = value;
+                    _selectedValue = value;
                   });
                 }),
-            SizedBox(
+            const SizedBox(
               height: 20,
             ),
-            RaisedButton(
-              onPressed: ()async{
-                var todoObject = Todo();
-                todoObject.title = _todoTitleController.text;
-                todoObject.isFinished ='0';
-                todoObject.folder = _selectedValue.toString();
-                todoObject.TodoDate = _todoDateController.text ;
+            ElevatedButton(
+                onPressed: () async {
+                  var todoObject = Todo();
+                  todoObject.title = _todoTitleController.text;
+                  todoObject.isFinished = '0';
+                  todoObject.folder = _selectedValue.toString();
+                  todoObject.TodoDate = _todoDateController.text;
 
-                var _todoService = TodoService();
-                var result = await _todoService.saveTodo(todoObject);
+                  var _todoService = TodoService();
+                  var result = await _todoService.saveTodo(todoObject);
 
-                if(result>0){
-                  _showSuccessSnackBar(Text('Created'));
-                }
+                  if (result > 0) {
+                    _showSuccessSnackBar(const Text('Created'));
+                  }
 
-                print(result);
-              },
-                color: Colors.yellowAccent,
-                child: Text('Save', style: TextStyle(color: Colors.black),)
-            )
+                  print(result);
+                },
+                child: const Text(
+                  'Save',
+                  style: TextStyle(color: Colors.black),
+                ))
           ],
         ),
       ),
